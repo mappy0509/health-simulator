@@ -3,317 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>かんたん保険料シミュレーション</title>
+    <title>社会保険料削減シミュレーター</title>
+    <!-- faviconのエラーを防ぐためのダミーリンク -->
+    <link rel="icon" href="data:,">
     <!-- Tailwind CSSを読み込み -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts (Inter) を読み込み -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* カスタムスタイル */
-        body {
-            font-family: 'Inter', 'Noto Sans JP', sans-serif;
-        }
-        /* アニメーション用のクラス */
+        /* 簡単なアニメーション効果 */
         .fade-in {
-            animation: fadeIn 0.5s ease-in-out forwards;
-        }
-        .fade-out {
-            animation: fadeOut 0.5s ease-in-out forwards;
+            animation: fadeIn 0.5s ease-in-out;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes fadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
+        /* チェックされたラジオボタンのラベルのスタイル */
+        .radio-label:has(input:checked) {
+            background-color: #eff6ff; /* blue-50 */
+            border-color: #3b82f6; /* blue-500 */
         }
-        /* ローディングスピナー */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4f46e5;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* 全画面ウォーターマークのスタイル */
+        .watermark {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none; /* クリック操作を妨げないようにする */
+            z-index: 9999; /* 最前面に表示 */
+            opacity: 0.06; /* 透かしの濃さ */
+            background-image: url("data:image/svg+xml,%3Csvg width='300' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' transform='rotate(-30 150 100)' font-family='monospace' font-size='20' fill='%23000000'%3EYAMAMOTO CREATE%3C/text%3E%3C/svg%3E");
+            background-repeat: repeat;
         }
     </style>
 </head>
-<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen font-sans">
+    <!-- 全画面ウォーターマーク -->
+    <div class="watermark"></div>
 
-    <!-- シミュレーターのメインコンテナ -->
-    <div id="simulator-container" class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-lg transition-all duration-500">
+    <div class="w-full max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 bg-white rounded-2xl shadow-lg fade-in">
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4 sm:mb-6">社会保険料削減 シミュレーター</h1>
+        <p class="text-center text-gray-500 mb-6 sm:mb-8">現在の保険料などを入力すると、削減額の目安が自動で計算されます。</p>
 
-        <!-- スタート画面 -->
-        <div id="start-screen" class="text-center fade-in">
-            <div class="mb-6">
-                <!-- アイコンを計算機に変更 -->
-                <svg class="w-16 h-16 mx-auto text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008Zm0 3h.008v.008H8.25v-.008Zm0 3h.008v.008H8.25v-.008Zm3-6h.008v.008H11.25v-.008Zm0 3h.008v.008H11.25v-.008Zm0 3h.008v.008H11.25v-.008Zm3-6h.008v.008H14.25v-.008Zm0 3h.008v.008H14.25v-.008Zm0 3h.008v.008H14.25v-.008ZM6 21a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3Z" />
-                </svg>
-            </div>
-            <!-- 文言を保険料シミュレーション用に変更 -->
-            <h1 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">かんたん保険料シミュレーション</h1>
-            <p class="text-slate-600 mb-8">お住まいの地域や所得状況から、<br>あなたの保険料がいくらになるかチェック！</p>
-            <button id="start-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                シミュレーションを開始
-            </button>
-        </div>
-
-        <!-- 質問画面 -->
-        <div id="question-screen" class="hidden">
-            <!-- プログレスバー -->
-            <div class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
-                <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
-            </div>
-            <!-- 質問内容 -->
-            <div id="question-content">
-                <h2 id="question-text" class="text-xl font-bold text-slate-800 mb-6 text-center" style="min-height: 56px;"></h2>
-                <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- 選択肢ボタンはここに動的に生成されます -->
+        <div class="space-y-6">
+            <!-- 1. 現在の国民健康保険料 (レイアウト改善) -->
+            <div class="p-4 sm:p-5 border border-gray-200 rounded-lg">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">1. 現在の国民健康保険料</h2>
+                <div class="space-y-3">
+                    <label for="monthly_insurance" class="block text-sm font-medium text-gray-600">毎月の保険料を入力してください</label>
+                    <div class="flex items-center">
+                        <input type="number" id="monthly_insurance" placeholder="例: 25000" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        <span class="ml-2 text-gray-600">円</span>
+                    </div>
+                    <div class="mt-2 bg-gray-50 p-3 rounded-md flex justify-between items-center">
+                        <span class="text-gray-600">年間保険料 (①)</span>
+                        <div>
+                            <span id="annual_insurance_result" class="font-bold text-lg text-blue-600">0</span>
+                            <span class="ml-1 text-gray-600">円</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- ローディング画面 -->
-        <div id="loading-screen" class="hidden text-center fade-in">
-            <div class="loader mx-auto"></div>
-            <p class="text-slate-600 mt-4 font-semibold">あなたの保険料を計算中...</p>
-        </div>
-
-        <!-- 結果画面 -->
-        <div id="result-screen" class="hidden text-center">
-             <div class="mb-6">
-                <!-- アイコンを割引タグに変更 -->
-                <svg class="w-16 h-16 mx-auto text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
-                </svg>
+            <!-- 2. 国民年金 (レイアウト改善) -->
+            <div class="p-4 sm:p-5 border border-gray-200 rounded-lg">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">2. 国民年金</h2>
+                <div class="space-y-4">
+                    <!-- ご本人様 -->
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">ご本人様（月額）</span>
+                        <span class="font-medium text-gray-800 bg-gray-100 px-3 py-1 rounded">17,510 円</span>
+                    </div>
+                    <!-- 配偶者様 -->
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">配偶者様</span>
+                        <div class="flex items-center space-x-2" id="spouse_status_group">
+                            <label class="flex items-center cursor-pointer rounded-md px-3 py-1 border radio-label transition">
+                                <input type="radio" name="spouse_status" value="yes" class="sr-only">
+                                <span class="text-gray-700">あり</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer rounded-md px-3 py-1 border radio-label transition">
+                                <input type="radio" name="spouse_status" value="no" class="sr-only" checked>
+                                <span class="text-gray-700">なし</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-4 border-gray-200">
+                <!-- 合計 -->
+                <div class="space-y-2">
+                    <div class="bg-gray-50 p-3 rounded-md flex justify-between items-center">
+                        <span class="text-gray-600">月額合計</span>
+                        <div>
+                            <span id="monthly_pension_total" class="font-bold text-lg text-blue-600">17,510</span>
+                            <span class="ml-1 text-gray-600">円</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-md flex justify-between items-center">
+                        <span class="text-gray-600">年間合計 (②)</span>
+                        <div>
+                            <span id="annual_pension_result" class="font-bold text-lg text-blue-600">210,120</span>
+                            <span class="ml-1 text-gray-600">円</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <h2 class="text-2xl font-bold text-slate-800 mb-2">シミュレーション結果</h2>
-            <p class="text-slate-600 mb-6">お住まいの市区町村の保険料と比較した結果です。</p>
             
-            <div id="result-details" class="bg-slate-50 border-2 border-indigo-200 rounded-lg p-6 mb-6 text-left">
-                <!-- 結果はここに動的に生成されます -->
+            <!-- 3. 削減額の計算 (レイアウト改善) -->
+            <div class="p-4 sm:p-5 bg-blue-50 border border-blue-200 rounded-lg">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">3. 削減額の計算</h2>
+                <div class="space-y-4">
+                    <!-- 現在の年間支払額 -->
+                    <div class="flex justify-between items-center text-sm sm:text-base">
+                        <span class="text-gray-600">現在の年間支払額 (① + ②)</span>
+                        <div>
+                            <span id="combined_annual_result" class="font-bold text-lg text-gray-800">210,120</span>
+                            <span class="ml-1 text-gray-600">円</span>
+                        </div>
+                    </div>
+                    <!-- 新しい年間支払額 -->
+                    <div class="flex justify-between items-center text-sm sm:text-base">
+                        <span class="text-gray-600">新しい年間支払額</span>
+                        <span class="font-medium text-gray-800">456,000 円 <span class="text-xs sm:text-sm text-gray-500">(38,000円 × 12ヵ月)</span></span>
+                    </div>
+                    <hr class="my-2 border-gray-300 border-dashed">
+                    <!-- 毎月の削減額 -->
+                    <div class="bg-white p-3 rounded-md flex justify-between items-center shadow-sm">
+                        <span class="text-lg font-semibold text-gray-700">毎月の削減額</span>
+                        <div>
+                            <span id="monthly_reduction_result" class="font-bold text-2xl text-green-600">0</span>
+                            <span class="ml-1 text-gray-600 font-medium">円</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <button id="retry-btn" class="w-full bg-slate-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-700 transition-all duration-300 transform hover:scale-105">
-                もう一度シミュレーションする
-            </button>
+            <!-- 4. 節税効果 -->
+            <div class="p-4 sm:p-5 border border-gray-200 rounded-lg">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">4. 節税効果 (所得に応じて変動)</h2>
+                 <div class="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
+                    <div class="flex items-center w-full">
+                         <label for="tax_saving" class="mr-2 text-gray-600">所得税・住民税の年間節税額</label>
+                        <input type="number" id="tax_saving" value="200000" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        <span class="ml-2 text-gray-600">円</span>
+                    </div>
+                </div>
+                 <p class="text-xs text-gray-500 mt-2">※所得にもよりますが年間20万前後の節税が見込めます。ご自身の状況に合わせて数値を変更してください。</p>
+            </div>
+
+            <!-- 最終結果 -->
+            <div class="mt-8 p-6 bg-green-50 border-2 border-green-500 rounded-2xl text-center">
+                <h2 class="text-xl font-semibold text-green-800 mb-2">その効果も合わせると…</h2>
+                <p class="text-lg text-green-700">年間の合計削減額は</p>
+                <p class="my-2">
+                    <span class="font-extrabold text-3xl sm:text-4xl md:text-5xl text-green-600" id="final_reduction_result">0</span>
+                    <span class="text-xl sm:text-2xl font-semibold text-green-700 ml-2">円</span>
+                </p>
+                <p class="text-sm text-gray-500">(シミュレーション結果はあくまで目安です)</p>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- データ部分 ---
-        // 依頼元のサイトに合わせて質問と結果のダミーデータを変更
+        // DOM要素を取得
+        const monthlyInsuranceInput = document.getElementById('monthly_insurance');
+        const spouseStatusRadios = document.querySelectorAll('input[name="spouse_status"]');
+        const taxSavingInput = document.getElementById('tax_saving');
 
-        const dummyQuestions = [
-            {
-                question: "お住まいの地域を選択してください。",
-                options: ["東京都", "神奈川県", "大阪府", "福岡県", "北海道", "その他"]
-            },
-            {
-                question: "あなたの年齢を教えてください。",
-                options: ["〜29歳", "30〜39歳", "40〜49歳", "50歳以上"]
-            },
-            {
-                question: "年間の所得（見込み）はどれくらいですか？",
-                options: ["〜300万円", "301〜500万円", "501〜800万円", "801万円以上"]
-            },
-            {
-                question: "世帯人数（ご本人様含む）を教えてください。",
-                options: ["1人", "2人", "3人", "4人以上"]
-            }
-        ];
+        const annualInsuranceResult = document.getElementById('annual_insurance_result');
+        const monthlyPensionTotal = document.getElementById('monthly_pension_total');
+        const annualPensionResult = document.getElementById('annual_pension_result');
+        const combinedAnnualResult = document.getElementById('combined_annual_result');
+        const monthlyReductionResult = document.getElementById('monthly_reduction_result');
+        const finalReductionResult = document.getElementById('final_reduction_result');
         
-        // 結果の形式を保険料比較に変更
-        const dummyResults = [
-            {
-                cooperative_premium: "452,000円",
-                municipal_premium: "610,000円",
-                savings: "158,000円",
-                description: "あなたは年間で約15.8万円お得になる可能性があります！"
-            },
-            {
-                cooperative_premium: "285,000円",
-                municipal_premium: "350,000円",
-                savings: "65,000円",
-                description: "あなたは年間で約6.5万円お得になる可能性があります！"
-            },
-            {
-                cooperative_premium: "710,000円",
-                municipal_premium: "920,000円",
-                savings: "210,000円",
-                description: "あなたは年間で約21万円もお得になる可能性があります！"
-            }
-        ];
+        // 定数を設定
+        const SELF_PENSION_MONTHLY = 17510;
+        const MONTHS = 12;
+        const NEW_MONTHLY_COST = 38000;
 
-        // --- DOM要素の取得 ---
-        const startScreen = document.getElementById('start-screen');
-        const questionScreen = document.getElementById('question-screen');
-        const loadingScreen = document.getElementById('loading-screen');
-        const resultScreen = document.getElementById('result-screen');
-        
-        const startBtn = document.getElementById('start-btn');
-        const retryBtn = document.getElementById('retry-btn');
-        
-        const progressBar = document.getElementById('progress-bar');
-        const questionText = document.getElementById('question-text');
-        const optionsContainer = document.getElementById('options-container');
-        const questionContent = document.getElementById('question-content');
-        const resultDetails = document.getElementById('result-details');
-        
-        // --- 状態管理 ---
-        let currentQuestionIndex = 0;
-        let userAnswers = [];
+        // 数字を整形するヘルパー関数
+        const formatCurrency = (number) => {
+            // 計算結果がマイナスの場合も考慮
+            const value = Math.round(number);
+            return value.toLocaleString();
+        };
 
-        // --- イベントリスナー ---
-        startBtn.addEventListener('click', startDiagnosis);
-        retryBtn.addEventListener('click', resetDiagnosis);
+        // 計算を実行する関数
+        function calculate() {
+            // 1. ユーザー入力を取得
+            const monthlyInsurance = parseFloat(monthlyInsuranceInput.value) || 0;
+            const taxSaving = parseFloat(taxSavingInput.value) || 0;
+            
+            // 配偶者の有無で年金額を決定
+            const selectedSpouseValue = document.querySelector('input[name="spouse_status"]:checked').value;
+            const spousePension = selectedSpouseValue === 'yes' ? SELF_PENSION_MONTHLY : 0;
 
-        // --- 関数定義 ---
+            // 2. 各項目を計算
+            // 国民健康保険料 (年間)
+            const annualInsurance = monthlyInsurance * MONTHS;
 
-        /**
-         * 診断を開始する関数
-         */
-        function startDiagnosis() {
-            startScreen.classList.add('fade-out');
-            setTimeout(() => {
-                startScreen.classList.add('hidden');
-                startScreen.classList.remove('fade-out');
-                
-                questionScreen.classList.remove('hidden');
-                questionScreen.classList.add('fade-in');
-                
-                displayQuestion(currentQuestionIndex);
-            }, 500);
+            // 国民年金 (月額と年間)
+            const totalMonthlyPension = SELF_PENSION_MONTHLY + spousePension;
+            const annualPension = totalMonthlyPension * MONTHS;
+            
+            // 支払い合計額 (年間)
+            const combinedAnnual = annualInsurance + annualPension;
+            
+            // 削減額を計算
+            // (現在の年間支払額) - (新しい年間支払額)
+            const annualReduction = combinedAnnual - (NEW_MONTHLY_COST * MONTHS);
+            const monthlyReduction = annualReduction / MONTHS;
+
+            // 最終的な削減額 (節税効果を含む)
+            const finalReduction = annualReduction + taxSaving;
+
+            // 3. 結果を画面に表示
+            annualInsuranceResult.textContent = formatCurrency(annualInsurance);
+            monthlyPensionTotal.textContent = formatCurrency(totalMonthlyPension);
+            annualPensionResult.textContent = formatCurrency(annualPension);
+            combinedAnnualResult.textContent = formatCurrency(combinedAnnual);
+            // 削減額がマイナス（つまり増額）の場合は赤字で表示
+            monthlyReductionResult.textContent = formatCurrency(monthlyReduction);
+            monthlyReductionResult.classList.toggle('text-red-600', monthlyReduction < 0);
+            monthlyReductionResult.classList.toggle('text-green-600', monthlyReduction >= 0);
+
+            finalReductionResult.textContent = formatCurrency(finalReduction);
         }
 
-        /**
-         * 質問を表示する関数
-         * @param {number} index - 表示する質問のインデックス
-         */
-        function displayQuestion(index) {
-            if (index >= dummyQuestions.length) return;
+        // 入力イベントリスナーを設定
+        monthlyInsuranceInput.addEventListener('input', calculate);
+        spouseStatusRadios.forEach(radio => radio.addEventListener('change', calculate));
+        taxSavingInput.addEventListener('input', calculate);
 
-            const progress = ((index + 1) / dummyQuestions.length) * 100;
-            progressBar.style.width = `${progress}%`;
-
-            const question = dummyQuestions[index];
-            questionText.textContent = question.question;
-            optionsContainer.innerHTML = '';
-
-            question.options.forEach(option => {
-                const button = document.createElement('button');
-                button.textContent = option;
-                button.className = "w-full bg-slate-100 text-slate-800 font-semibold py-3 px-4 rounded-lg hover:bg-indigo-100 hover:border-indigo-300 border-2 border-transparent transition-all duration-200";
-                button.addEventListener('click', () => handleAnswer(option));
-                optionsContainer.appendChild(button);
-            });
-            
-            questionContent.classList.remove('fade-out');
-            questionContent.classList.add('fade-in');
-        }
-
-        /**
-         * 回答を選択したときの処理
-         * @param {string} answer - ユーザーが選択した回答
-         */
-        function handleAnswer(answer) {
-            userAnswers.push(answer);
-            currentQuestionIndex++;
-            
-            questionContent.classList.remove('fade-in');
-            questionContent.classList.add('fade-out');
-
-            setTimeout(() => {
-                if (currentQuestionIndex < dummyQuestions.length) {
-                    displayQuestion(currentQuestionIndex);
-                } else {
-                    showLoadingAndResult();
-                }
-            }, 500);
-        }
-        
-        /**
-         * ローディング画面と結果表示を制御する関数
-         */
-        function showLoadingAndResult() {
-            questionScreen.classList.remove('fade-in');
-            questionScreen.classList.add('fade-out');
-            
-            setTimeout(() => {
-                questionScreen.classList.add('hidden');
-                
-                loadingScreen.classList.remove('hidden');
-                loadingScreen.classList.add('fade-in');
-                
-                setTimeout(() => {
-                    displayResult();
-                }, 2000);
-            }, 500);
-        }
-        
-        /**
-         * 結果を表示する関数
-         */
-        function displayResult() {
-            // ダミーの結果からランダムに1つ選択
-            const result = dummyResults[Math.floor(Math.random() * dummyResults.length)];
-            
-            // 結果表示のHTMLを新しい形式に変更
-            resultDetails.innerHTML = `
-                <div class="space-y-4">
-                    <div>
-                        <p class="text-sm text-slate-500">お住まいの市区町村の年額保険料</p>
-                        <p class="text-2xl font-bold text-slate-500 line-through">¥${result.municipal_premium}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-indigo-700 font-semibold">当組合の年額保険料（目安）</p>
-                        <p class="text-4xl font-bold text-indigo-700">¥${result.cooperative_premium}</p>
-                    </div>
-                </div>
-                <div class="mt-6 bg-green-100 text-green-800 rounded-lg p-4 text-center">
-                    <p class="font-bold text-lg">
-                        年間で <span class="text-3xl font-extrabold text-green-700">¥${result.savings}</span> お得に！
-                    </p>
-                    <p class="text-sm mt-1">${result.description}</p>
-                </div>
-            `;
-            
-            loadingScreen.classList.remove('fade-in');
-            loadingScreen.classList.add('fade-out');
-            
-            setTimeout(() => {
-                loadingScreen.classList.add('hidden');
-                resultScreen.classList.remove('hidden');
-                resultScreen.classList.add('fade-in');
-            }, 500);
-        }
-
-        /**
-         * 診断をリセットする関数
-         */
-        function resetDiagnosis() {
-            currentQuestionIndex = 0;
-            userAnswers = [];
-            progressBar.style.width = '0%';
-            
-            resultScreen.classList.remove('fade-in');
-            resultScreen.classList.add('fade-out');
-            
-            setTimeout(() => {
-                resultScreen.classList.add('hidden');
-                startScreen.classList.remove('hidden', 'fade-out');
-                startScreen.classList.add('fade-in');
-            }, 500);
-        }
+        // 初期計算を実行
+        calculate();
     </script>
 </body>
 </html>
