@@ -3,242 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>社会保険料削減シミュレーター</title>
-    <!-- faviconのエラーを防ぐためのダミーリンク -->
+    <title>【最終版】あなたの社会保険料は本当に適正？ | 超高精度 削減シミュレーター</title>
     <link rel="icon" href="data:,">
-    <!-- Tailwind CSSを読み込み -->
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* 簡単なアニメーション効果 */
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* チェックされたラジオボタンのラベルのスタイル */
-        .radio-label:has(input:checked) {
-            background-color: #eff6ff; /* blue-50 */
-            border-color: #3b82f6; /* blue-500 */
-        }
-        /* 全画面ウォーターマークのスタイル */
-        .watermark {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none; /* クリック操作を妨げないようにする */
-            z-index: 9999; /* 最前面に表示 */
-            opacity: 0.06; /* 透かしの濃さ */
-            background-image: url("data:image/svg+xml,%3Csvg width='300' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' transform='rotate(-30 150 100)' font-family='monospace' font-size='20' fill='%23000000'%3EYAMAMOTO CREATE%3C/text%3E%3C/svg%3E");
-            background-repeat: repeat;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen font-sans">
-    <!-- 全画面ウォーターマーク -->
+<body class="bg-slate-50">
     <div class="watermark"></div>
+    <main>
+        <section class="hero-bg py-12 sm:py-20">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                <div class="text-center">
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-800 tracking-tight fade-in-up">
+                        その社会保険料、<br class="sm:hidden">
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-blue-600">本当に適正価格</span>ですか？
+                    </h1>
+                    <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto fade-in-up" style="animation-delay: 0.2s;">
+                        家族構成をより詳しく入力することで、あなたの**リアルな年間支払額**と**削減可能額**を、さらに正確にシミュレーションします。
+                    </p>
+                </div>
 
-    <div class="w-full max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 bg-white rounded-2xl shadow-lg fade-in">
-        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4 sm:mb-6">社会保険料削減 シミュレーター</h1>
-        <p class="text-center text-gray-500 mb-6 sm:mb-8">現在の保険料などを入力すると、削減額の目安が自動で計算されます。</p>
+                <div id="simulator" class="mt-10 max-w-2xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-200 fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="p-6 sm:p-8">
+                        <h2 class="text-xl sm:text-2xl font-bold text-center text-slate-800">超高精度 削減シミュレーター</h2>
+                        <div class="mt-6 space-y-5">
+                            <div>
+                                <label for="income" class="block text-sm font-semibold text-slate-600 mb-1">あなたの前年の総所得</label>
+                                <div class="relative">
+                                    <input type="number" id="income" placeholder="例: 400" class="w-full pl-3 pr-16 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 transition">
+                                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500">万円</span>
+                                </div>
+                                 <p class="text-xs text-slate-500 mt-1">※売上から経費を引いた事業所得などを入力</p>
+                            </div>
 
-        <div class="space-y-6">
-            <!-- 1. 現在の国民健康保険料 (レイアウト改善) -->
-            <div class="p-4 sm:p-5 border border-gray-200 rounded-lg">
-                <h2 class="text-lg font-semibold text-gray-700 mb-4">1. 現在の国民健康保険料</h2>
-                <div class="space-y-3">
-                    <label for="monthly_insurance" class="block text-sm font-medium text-gray-600">毎月の保険料を入力してください</label>
-                    <div class="flex items-center">
-                        <input type="number" id="monthly_insurance" placeholder="例: 25000" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                        <span class="ml-2 text-gray-600">円</span>
-                    </div>
-                    <div class="mt-2 bg-gray-50 p-3 rounded-md flex justify-between items-center">
-                        <span class="text-gray-600">年間保険料 (①)</span>
-                        <div>
-                            <span id="annual_insurance_result" class="font-bold text-lg text-blue-600">0</span>
-                            <span class="ml-1 text-gray-600">円</span>
+                            <div>
+                                <label for="age" class="block text-sm font-semibold text-slate-600 mb-1">あなたの年齢</label>
+                                <div class="relative">
+                                    <select id="age" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 transition">
+                                        <option value="39">39歳以下</option>
+                                        <option value="40">40歳～64歳</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-600 mb-2">あなたの扶養家族</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="relative">
+                                        <label for="spouse_age" class="block text-xs font-medium text-slate-500 mb-1">配偶者の年齢</label>
+                                         <select id="spouse_age" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 transition">
+                                            <option value="none">なし</option>
+                                            <option value="39">あり (39歳以下)</option>
+                                            <option value="40">あり (40歳～64歳)</option>
+                                        </select>
+                                    </div>
+                                    <div class="relative">
+                                        <label for="preschool_dependents" class="block text-xs font-medium text-slate-500 mb-1">未就学児の人数</label>
+                                         <select id="preschool_dependents" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 transition">
+                                            <option value="0">0人</option>
+                                            <option value="1">1人</option>
+                                            <option value="2">2人</option>
+                                            <option value="3">3人以上</option>
+                                        </select>
+                                    </div>
+                                    <div class="relative col-span-2">
+                                        <label for="other_dependents" class="block text-xs font-medium text-slate-500 mb-1">その他の扶養家族 (小学生以上) の人数</label>
+                                         <select id="other_dependents" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 transition">
+                                            <option value="0">0人</option>
+                                            <option value="1">1人</option>
+                                            <option value="2">2人</option>
+                                            <option value="3">3人以上</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button id="calculate_button" class="w-full bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold text-lg py-3 px-6 rounded-lg shadow-md cta-button transition !mt-8">
+                                削減額を計算する
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
+        </section>
 
-            <!-- 2. 国民年金 (レイアウト改善) -->
-            <div class="p-4 sm:p-5 border border-gray-200 rounded-lg">
-                <h2 class="text-lg font-semibold text-gray-700 mb-4">2. 国民年金</h2>
-                <div class="space-y-4">
-                    <!-- ご本人様 -->
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">ご本人様（月額）</span>
-                        <span class="font-medium text-gray-800 bg-gray-100 px-3 py-1 rounded">17,510 円</span>
-                    </div>
-                    <!-- 配偶者様 -->
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">配偶者様</span>
-                        <div class="flex items-center space-x-2" id="spouse_status_group">
-                            <label class="flex items-center cursor-pointer rounded-md px-3 py-1 border radio-label transition">
-                                <input type="radio" name="spouse_status" value="yes" class="sr-only">
-                                <span class="text-gray-700">あり</span>
-                            </label>
-                            <label class="flex items-center cursor-pointer rounded-md px-3 py-1 border radio-label transition">
-                                <input type="radio" name="spouse_status" value="no" class="sr-only" checked>
-                                <span class="text-gray-700">なし</span>
-                            </label>
-                        </div>
-                    </div>
+        <div id="result_modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden modal-backdrop">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-8 text-center modal-content" id="modal_content_area">
                 </div>
-                <hr class="my-4 border-gray-200">
-                <!-- 合計 -->
-                <div class="space-y-2">
-                    <div class="bg-gray-50 p-3 rounded-md flex justify-between items-center">
-                        <span class="text-gray-600">月額合計</span>
-                        <div>
-                            <span id="monthly_pension_total" class="font-bold text-lg text-blue-600">17,510</span>
-                            <span class="ml-1 text-gray-600">円</span>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-md flex justify-between items-center">
-                        <span class="text-gray-600">年間合計 (②)</span>
-                        <div>
-                            <span id="annual_pension_result" class="font-bold text-lg text-blue-600">210,120</span>
-                            <span class="ml-1 text-gray-600">円</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 3. 削減額の計算 (レイアウト改善) -->
-            <div class="p-4 sm:p-5 bg-blue-50 border border-blue-200 rounded-lg">
-                <h2 class="text-lg font-semibold text-gray-700 mb-4">3. 削減額の計算</h2>
-                <div class="space-y-4">
-                    <!-- 現在の年間支払額 -->
-                    <div class="flex justify-between items-center text-sm sm:text-base">
-                        <span class="text-gray-600">現在の年間支払額 (① + ②)</span>
-                        <div>
-                            <span id="combined_annual_result" class="font-bold text-lg text-gray-800">210,120</span>
-                            <span class="ml-1 text-gray-600">円</span>
-                        </div>
-                    </div>
-                    <!-- 新しい年間支払額 -->
-                    <div class="flex justify-between items-center text-sm sm:text-base">
-                        <span class="text-gray-600">新しい年間支払額</span>
-                        <span class="font-medium text-gray-800">456,000 円 <span class="text-xs sm:text-sm text-gray-500">(38,000円 × 12ヵ月)</span></span>
-                    </div>
-                    <hr class="my-2 border-gray-300 border-dashed">
-                    <!-- 毎月の削減額 -->
-                    <div class="bg-white p-3 rounded-md flex justify-between items-center shadow-sm">
-                        <span class="text-lg font-semibold text-gray-700">毎月の削減額</span>
-                        <div>
-                            <span id="monthly_reduction_result" class="font-bold text-2xl text-green-600">0</span>
-                            <span class="ml-1 text-gray-600 font-medium">円</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. 節税効果 -->
-            <div class="p-4 sm:p-5 border border-gray-200 rounded-lg">
-                <h2 class="text-lg font-semibold text-gray-700 mb-4">4. 節税効果 (所得に応じて変動)</h2>
-                 <div class="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
-                    <div class="flex items-center w-full">
-                         <label for="tax_saving" class="mr-2 text-gray-600">所得税・住民税の年間節税額</label>
-                        <input type="number" id="tax_saving" value="200000" class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                        <span class="ml-2 text-gray-600">円</span>
-                    </div>
-                </div>
-                 <p class="text-xs text-gray-500 mt-2">※所得にもよりますが年間20万前後の節税が見込めます。ご自身の状況に合わせて数値を変更してください。</p>
-            </div>
-
-            <!-- 最終結果 -->
-            <div class="mt-8 p-6 bg-green-50 border-2 border-green-500 rounded-2xl text-center">
-                <h2 class="text-xl font-semibold text-green-800 mb-2">その効果も合わせると…</h2>
-                <p class="text-lg text-green-700">年間の合計削減額は</p>
-                <p class="my-2">
-                    <span class="font-extrabold text-3xl sm:text-4xl md:text-5xl text-green-600" id="final_reduction_result">0</span>
-                    <span class="text-xl sm:text-2xl font-semibold text-green-700 ml-2">円</span>
-                </p>
-                <p class="text-sm text-gray-500">(シミュレーション結果はあくまで目安です)</p>
-            </div>
         </div>
-    </div>
-
-    <script>
-        // DOM要素を取得
-        const monthlyInsuranceInput = document.getElementById('monthly_insurance');
-        const spouseStatusRadios = document.querySelectorAll('input[name="spouse_status"]');
-        const taxSavingInput = document.getElementById('tax_saving');
-
-        const annualInsuranceResult = document.getElementById('annual_insurance_result');
-        const monthlyPensionTotal = document.getElementById('monthly_pension_total');
-        const annualPensionResult = document.getElementById('annual_pension_result');
-        const combinedAnnualResult = document.getElementById('combined_annual_result');
-        const monthlyReductionResult = document.getElementById('monthly_reduction_result');
-        const finalReductionResult = document.getElementById('final_reduction_result');
         
-        // 定数を設定
-        const SELF_PENSION_MONTHLY = 17510;
-        const MONTHS = 12;
-        const NEW_MONTHLY_COST = 38000;
-
-        // 数字を整形するヘルパー関数
-        const formatCurrency = (number) => {
-            // 計算結果がマイナスの場合も考慮
-            const value = Math.round(number);
-            return value.toLocaleString();
-        };
-
-        // 計算を実行する関数
-        function calculate() {
-            // 1. ユーザー入力を取得
-            const monthlyInsurance = parseFloat(monthlyInsuranceInput.value) || 0;
-            const taxSaving = parseFloat(taxSavingInput.value) || 0;
-            
-            // 配偶者の有無で年金額を決定
-            const selectedSpouseValue = document.querySelector('input[name="spouse_status"]:checked').value;
-            const spousePension = selectedSpouseValue === 'yes' ? SELF_PENSION_MONTHLY : 0;
-
-            // 2. 各項目を計算
-            // 国民健康保険料 (年間)
-            const annualInsurance = monthlyInsurance * MONTHS;
-
-            // 国民年金 (月額と年間)
-            const totalMonthlyPension = SELF_PENSION_MONTHLY + spousePension;
-            const annualPension = totalMonthlyPension * MONTHS;
-            
-            // 支払い合計額 (年間)
-            const combinedAnnual = annualInsurance + annualPension;
-            
-            // 削減額を計算
-            // (現在の年間支払額) - (新しい年間支払額)
-            const annualReduction = combinedAnnual - (NEW_MONTHLY_COST * MONTHS);
-            const monthlyReduction = annualReduction / MONTHS;
-
-            // 最終的な削減額 (節税効果を含む)
-            const finalReduction = annualReduction + taxSaving;
-
-            // 3. 結果を画面に表示
-            annualInsuranceResult.textContent = formatCurrency(annualInsurance);
-            monthlyPensionTotal.textContent = formatCurrency(totalMonthlyPension);
-            annualPensionResult.textContent = formatCurrency(annualPension);
-            combinedAnnualResult.textContent = formatCurrency(combinedAnnual);
-            // 削減額がマイナス（つまり増額）の場合は赤字で表示
-            monthlyReductionResult.textContent = formatCurrency(monthlyReduction);
-            monthlyReductionResult.classList.toggle('text-red-600', monthlyReduction < 0);
-            monthlyReductionResult.classList.toggle('text-green-600', monthlyReduction >= 0);
-
-            finalReductionResult.textContent = formatCurrency(finalReduction);
-        }
-
-        // 入力イベントリスナーを設定
-        monthlyInsuranceInput.addEventListener('input', calculate);
-        spouseStatusRadios.forEach(radio => radio.addEventListener('change', calculate));
-        taxSavingInput.addEventListener('input', calculate);
-
-        // 初期計算を実行
-        calculate();
-    </script>
+        <section class="py-16 sm:py-24 bg-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6">
+                <div class="text-center">
+                    <h2 class="text-3xl font-extrabold text-slate-800">その<span class="text-red-500">高額な支払い</span>、いつまで続けますか？</h2>
+                </div>
+            </div>
+        </section>
+        <section class="py-16 sm:py-24 bg-slate-800 text-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+                <h2 class="text-3xl font-extrabold">解決策は、社会保険料を<span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-blue-400">「月額固定」</span>にすること。</h2>
+            </div>
+        </section>
+    </main>
+    <script src="script.js"></script>
 </body>
 </html>
-
