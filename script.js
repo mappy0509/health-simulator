@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- 設定項目 ---
-    const GAS_WEB_APP_URL = 'ここにデプロイしたURLを貼り付け';
-    const LINE_FRIEND_URL = 'https://lin.ee/XXXXXXXX';
+    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwkM6wzOrMrY6VVr8EYwJUOPBKAuRBgWGyIedCjs_fQPDi8uwXNOZHl-W1jt6xKCEM5/exec';
+    const LINE_FRIEND_URL = 'https://lin.ee/dDnbPak';
     // --- 設定はここまで ---
 
     // DOM要素
